@@ -70,8 +70,8 @@ function getJSON (opts) {
   *
   * @returns {string} download URL for the version
   * @returns {string} file without file type (to match the function above)
-  * @returns {string} variant name for the version - should be used as cache key
-  * @returns {string} version name - use for display only
+  * @returns {string} variant name for the version - used as L2 (runner) cache key
+  * @returns {string} version name - used as the L1 (job) cache key
   */
 async function resolveVersion (arch, platform, version) {
   const ext = extForPlatform(platform)
@@ -91,17 +91,21 @@ async function resolveVersion (arch, platform, version) {
 
   const host = `${resolvedArch}-${resolvedOs}`
 
-  // const index = await getJSON({ url: 'https://ziglang.org/download/index.json' })
-  const machIndex = await getJSON({ url: 'https://machengine.org/zig/index.json' })
+  // Mach json is advertised as a superset, but it's not updated on the same
+  // timeframe as the ZSF index.json. So notably, 'master' will be an old version
+  // on machengine.org
+  const index = version.includes('mach')
+    ? await getJSON({ url: 'https://machengine.org/zig/index.json' })
+    : await getJSON({ url: 'https://ziglang.org/download/index.json' })
 
-  const availableVersions = Object.keys(machIndex)
+  const availableVersions = Object.keys(index)
   const useVersion = semver.valid(version)
     ? semver.maxSatisfying(availableVersions.filter((v) => semver.valid(v)), version)
     : null
 
   // The mach index is advertised as a strict superset of the ziglang index,
   // but we will fall back to the the ziglang index just in case
-  const meta = machIndex[useVersion || version] ||
+  const meta = index[useVersion || version] ||
     (await getJSON({ url: 'https://ziglang.org/download/index.json' }))[useVersion || version]
 
   if (!meta || !meta[host]) {
@@ -117,7 +121,9 @@ async function resolveVersion (arch, platform, version) {
   // it. This is important as it is used as the cache key
   const variantName = path.basename(meta[host].tarball).replace(`.${ext}`, '').replace(/\+\S*$/, '')
 
-  return { downloadUrl, fileWithoutFileType, variantName, version: useVersion || version }
+  const versionFromDownloadUrl = variantName.match(/[^-]*-[^-]*-[^-]*-(.*)/)[1]
+
+  return { downloadUrl, fileWithoutFileType, variantName, version: versionFromDownloadUrl }
 }
 
 module.exports = {

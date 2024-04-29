@@ -82166,17 +82166,18 @@ var require_versions = __commonJS({
         x64: "x86_64"
       }[arch];
       const host = `${resolvedArch}-${resolvedOs}`;
-      const machIndex = await getJSON({ url: "https://machengine.org/zig/index.json" });
-      const availableVersions = Object.keys(machIndex);
+      const index = version3.includes("mach") ? await getJSON({ url: "https://machengine.org/zig/index.json" }) : await getJSON({ url: "https://ziglang.org/download/index.json" });
+      const availableVersions = Object.keys(index);
       const useVersion = semver2.valid(version3) ? semver2.maxSatisfying(availableVersions.filter((v) => semver2.valid(v)), version3) : null;
-      const meta = machIndex[useVersion || version3] || (await getJSON({ url: "https://ziglang.org/download/index.json" }))[useVersion || version3];
+      const meta = index[useVersion || version3] || (await getJSON({ url: "https://ziglang.org/download/index.json" }))[useVersion || version3];
       if (!meta || !meta[host]) {
         throw new Error(`Could not find version ${useVersion || version3} for platform ${host}`);
       }
       const downloadUrl = meta[host].tarball;
       const fileWithoutFileType = downloadUrl.match(/.*\/(.*)(\.zip|\.tar\..*$)/)[1];
       const variantName = path2.basename(meta[host].tarball).replace(`.${ext}`, "").replace(/\+\S*$/, "");
-      return { downloadUrl, fileWithoutFileType, variantName, version: useVersion || version3 };
+      const versionFromDownloadUrl = variantName.match(/[^-]*-[^-]*-[^-]*-(.*)/)[1];
+      return { downloadUrl, fileWithoutFileType, variantName, version: versionFromDownloadUrl };
     }
     __name(resolveVersion2, "resolveVersion");
     module2.exports = {

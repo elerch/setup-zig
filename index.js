@@ -17,6 +17,12 @@ const TOOL_NAME = 'zig'
 async function downloadZig (arch, platform, version, useCache = true) {
   const ext = extForPlatform(platform)
 
+  // There are three levels of data here:
+  // 1. Local cache - this is literally cache already established with the job
+  //    container, and is a pre-unpacked directory
+  // 2. Runner cache - this is a cache that is outside the job, but still
+  //    on the host that is running jobs
+  // 3. The canonical source
   const {
     downloadUrl,
     fileWithoutFileType,
@@ -26,12 +32,14 @@ async function downloadZig (arch, platform, version, useCache = true) {
     ? resolveCommit(arch, platform, version)
     : await resolveVersion(arch, platform, version)
 
+  // Check L1 and return on hit
   const cachedPath = toolCache.find(TOOL_NAME, useVersion)
   if (cachedPath) {
     actions.info(`using cached zig install (version ${useVersion}): ${cachedPath}`)
     return cachedPath
   }
 
+  // Check L2 and return on hit
   const cacheKey = `${TOOL_NAME}-${variantName}`
   if (useCache) {
     const restorePath = path.join(process.env.RUNNER_TOOL_CACHE, TOOL_NAME, useVersion, arch)
@@ -43,6 +51,7 @@ async function downloadZig (arch, platform, version, useCache = true) {
     }
   }
 
+  // Miss on L1 and on L2. Need to go to canonical source
   actions.info(`no cached version found. downloading zig ${variantName}`)
   const downloadPath = await toolCache.downloadTool(downloadUrl)
   const zigPath = ext === 'zip'

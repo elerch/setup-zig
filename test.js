@@ -52,25 +52,25 @@ async function test () {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-macos-aarch64-0.12.0-dev.2063+804cee3b9.tar.xz',
     fileWithoutFileType: 'zig-macos-aarch64-0.12.0-dev.2063+804cee3b9',
     variantName: 'zig-macos-aarch64-0.12.0-dev.2063',
-    version: '2024.1.0-mach'
+    version: '0.12.0-dev.2063'
   })
   assert.deepEqual(await resolveVersion('x64', 'linux', '2024.3.0-mach'), {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-linux-x86_64-0.12.0-dev.3180+83e578a18.tar.xz',
     fileWithoutFileType: 'zig-linux-x86_64-0.12.0-dev.3180+83e578a18',
     variantName: 'zig-linux-x86_64-0.12.0-dev.3180',
-    version: '2024.3.0-mach'
+    version: '0.12.0-dev.3180'
   })
   assert.deepEqual(await resolveVersion('x64', 'win32', '2024.1.0-mach'), {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-windows-x86_64-0.12.0-dev.2063+804cee3b9.zip',
     fileWithoutFileType: 'zig-windows-x86_64-0.12.0-dev.2063+804cee3b9',
     variantName: 'zig-windows-x86_64-0.12.0-dev.2063',
-    version: '2024.1.0-mach'
+    version: '0.12.0-dev.2063'
   })
   assert.deepEqual(await resolveVersion('arm64', 'darwin', '2024.3.0-mach'), {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-macos-aarch64-0.12.0-dev.3180+83e578a18.tar.xz',
     fileWithoutFileType: 'zig-macos-aarch64-0.12.0-dev.3180+83e578a18',
     variantName: 'zig-macos-aarch64-0.12.0-dev.3180',
-    version: '2024.3.0-mach'
+    version: '0.12.0-dev.3180'
   })
   await assert.doesNotReject(resolveVersion('x64', 'linux', 'mach-latest'))
   await assert.doesNotReject(resolveVersion('x64', 'win32', 'mach-latest'))
@@ -78,6 +78,9 @@ async function test () {
   await assert.doesNotReject(resolveVersion('x64', 'linux', 'master'))
   await assert.doesNotReject(resolveVersion('x64', 'win32', 'master'))
   await assert.doesNotReject(resolveVersion('arm64', 'darwin', 'master'))
+
+  assert.notEqual((await resolveVersion('arm64', 'darwin', 'mach-latest')).version, 'mach-latest')
+  assert.notEqual((await resolveVersion('arm64', 'darwin', 'master')).version, 'master')
 }
 
 test().catch((error) => {

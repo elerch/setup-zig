@@ -49,6 +49,7 @@ async function downloadZig (arch, platform, version, useCache = true) {
     ? await toolCache.extractZip(downloadPath)
     : await toolCache.extractTar(downloadPath, undefined, 'x')
 
+  actions.info(`${variantName} zig downloaded and extracted to ${zigPath}`)
   const binPath = path.join(zigPath, fileWithoutFileType)
   const cachePath = await toolCache.cacheDir(binPath, TOOL_NAME, useVersion)
 

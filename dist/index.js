@@ -82166,15 +82166,15 @@ var require_versions = __commonJS({
         x64: "x86_64"
       }[arch];
       const host = `${resolvedArch}-${resolvedOs}`;
-      const index = await getJSON({ url: "https://ziglang.org/download/index.json" });
-      const availableVersions = Object.keys(index);
+      const machIndex = await getJSON({ url: "https://machengine.org/zig/index.json" });
+      const availableVersions = Object.keys(machIndex);
       const useVersion = semver2.valid(version3) ? semver2.maxSatisfying(availableVersions.filter((v) => semver2.valid(v)), version3) : null;
-      const meta = index[useVersion || version3];
+      const meta = machIndex[useVersion || version3] || (await getJSON({ url: "https://ziglang.org/download/index.json" }))[useVersion || version3];
       if (!meta || !meta[host]) {
         throw new Error(`Could not find version ${useVersion || version3} for platform ${host}`);
       }
       const downloadUrl = meta[host].tarball;
-      const variantName = path2.basename(meta[host].tarball).replace(`.${ext}`, "");
+      const variantName = path2.basename(meta[host].tarball).replace(`.${ext}`, "").replace(/\+\S*$/, "");
       return { downloadUrl, variantName, version: useVersion || version3 };
     }
     __name(resolveVersion2, "resolveVersion");
@@ -82225,6 +82225,7 @@ async function downloadZig(arch, platform, version3, useCache = true) {
   actions.info(`no cached version found. downloading zig ${variantName}`);
   const downloadPath = await toolCache.downloadTool(downloadUrl);
   const zigPath = ext === "zip" ? await toolCache.extractZip(downloadPath) : await toolCache.extractTar(downloadPath, void 0, "x");
+  actions.info(`${variantName} zig downloaded and extracted to ${zigPath}`);
   const binPath = path.join(zigPath, fileWithoutFileType);
   const cachePath = await toolCache.cacheDir(binPath, TOOL_NAME, useVersion);
   if (useCache) {

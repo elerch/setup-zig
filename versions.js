@@ -10,6 +10,12 @@ function extForPlatform (platform) {
   }[platform]
 }
 
+/**
+  * resolveCommit resolves a specific commit, so is only used
+  * in cases where the zig version is specified through the use of a plus
+  * sign. It does not require any fetch from an external resource as the
+  * data (downloadUrl, etc) can be resolved directly
+  */
 function resolveCommit (arch, platform, version) {
   const ext = extForPlatform(platform)
   const resolvedOs = {
@@ -27,6 +33,11 @@ function resolveCommit (arch, platform, version) {
   }[arch]
 
   const downloadUrl = `https://ziglang.org/builds/zig-${resolvedOs}-${resolvedArch}-${version}.${ext}`
+  // This function is only called if the version includes a '+' sign, so mach versions
+  // will not come through here
+  //
+  // Mach builds come from pkg.machengine.org
+  // const machDownloadUrl = `https://pkg.machengine.org/zig/zig-${resolvedOs}-${resolvedArch}-${version}.${ext}`
   const versionWithoutBuildHash = semver.clean(version)
   const fileWithoutFileType = `zig-${resolvedOs}-${resolvedArch}-${version}`
   const variantName = `zig-${resolvedOs}-${resolvedArch}-${versionWithoutBuildHash}`
@@ -51,6 +62,16 @@ function getJSON (opts) {
   })
 }
 
+/**
+  * resolveVersion resolves a generic commit, so is only used
+  * in cases where the zig version is specified through WITHOUT the use of a plus
+  * sign. It needs to fetch data from the index files provided by zig (or mach)
+  * to determine the appropriate downloadUrl, etc.
+  *
+  * @returns {string} download URL for the version
+  * @returns {string} variant name for the version - should be used as cache key
+  * @returns {string} version name - use for display only
+  */
 async function resolveVersion (arch, platform, version) {
   const ext = extForPlatform(platform)
   const resolvedOs = {
@@ -69,20 +90,29 @@ async function resolveVersion (arch, platform, version) {
 
   const host = `${resolvedArch}-${resolvedOs}`
 
-  const index = await getJSON({ url: 'https://ziglang.org/download/index.json' })
+  // const index = await getJSON({ url: 'https://ziglang.org/download/index.json' })
+  const machIndex = await getJSON({ url: 'https://machengine.org/zig/index.json' })
 
-  const availableVersions = Object.keys(index)
+  const availableVersions = Object.keys(machIndex)
   const useVersion = semver.valid(version)
     ? semver.maxSatisfying(availableVersions.filter((v) => semver.valid(v)), version)
     : null
 
-  const meta = index[useVersion || version]
+  // The mach index is advertised as a strict superset of the ziglang index,
+  // but we will fall back to the the ziglang index just in case
+  const meta = machIndex[useVersion || version] ||
+    (await getJSON({ url: 'https://ziglang.org/download/index.json' }))[useVersion || version]
+
   if (!meta || !meta[host]) {
     throw new Error(`Could not find version ${useVersion || version} for platform ${host}`)
   }
 
   const downloadUrl = meta[host].tarball
-  const variantName = path.basename(meta[host].tarball).replace(`.${ext}`, '')
+  // If this is mach, we could end up with '+sha...' at the end of this, as
+  // a version of '2024.1.0-mach' will resolve to a specific dev version
+  // So, while the function is not called with "+...", we still have to deal with
+  // it. This is important as it is used as the cache key
+  const variantName = path.basename(meta[host].tarball).replace(`.${ext}`, '').replace(/\+\S*$/, '')
 
   return { downloadUrl, variantName, version: useVersion || version }
 }

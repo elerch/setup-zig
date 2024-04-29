@@ -82174,8 +82174,9 @@ var require_versions = __commonJS({
         throw new Error(`Could not find version ${useVersion || version3} for platform ${host}`);
       }
       const downloadUrl = meta[host].tarball;
+      const fileWithoutFileType = downloadUrl.match(/.*\/(.*)(\.zip|\.tar\..*$)/)[1];
       const variantName = path2.basename(meta[host].tarball).replace(`.${ext}`, "").replace(/\+\S*$/, "");
-      return { downloadUrl, variantName, version: useVersion || version3 };
+      return { downloadUrl, fileWithoutFileType, variantName, version: useVersion || version3 };
     }
     __name(resolveVersion2, "resolveVersion");
     module2.exports = {

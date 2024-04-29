@@ -69,6 +69,7 @@ function getJSON (opts) {
   * to determine the appropriate downloadUrl, etc.
   *
   * @returns {string} download URL for the version
+  * @returns {string} file without file type (to match the function above)
   * @returns {string} variant name for the version - should be used as cache key
   * @returns {string} version name - use for display only
   */
@@ -108,13 +109,15 @@ async function resolveVersion (arch, platform, version) {
   }
 
   const downloadUrl = meta[host].tarball
+
+  const fileWithoutFileType = downloadUrl.match(/.*\/(.*)(\.zip|\.tar\..*$)/)[1]
   // If this is mach, we could end up with '+sha...' at the end of this, as
   // a version of '2024.1.0-mach' will resolve to a specific dev version
   // So, while the function is not called with "+...", we still have to deal with
   // it. This is important as it is used as the cache key
   const variantName = path.basename(meta[host].tarball).replace(`.${ext}`, '').replace(/\+\S*$/, '')
 
-  return { downloadUrl, variantName, version: useVersion || version }
+  return { downloadUrl, fileWithoutFileType, variantName, version: useVersion || version }
 }
 
 module.exports = {

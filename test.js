@@ -32,36 +32,43 @@ async function test () {
 
   assert.deepEqual(await resolveVersion('x64', 'linux', '0.7.0'), {
     downloadUrl: 'https://ziglang.org/download/0.7.0/zig-linux-x86_64-0.7.0.tar.xz',
+    fileWithoutFileType: 'zig-linux-x86_64-0.7.0',
     variantName: 'zig-linux-x86_64-0.7.0',
     version: '0.7.0'
   })
   assert.deepEqual(await resolveVersion('x64', 'win32', '0.4.0'), {
     downloadUrl: 'https://ziglang.org/download/0.4.0/zig-windows-x86_64-0.4.0.zip',
+    fileWithoutFileType: 'zig-windows-x86_64-0.4.0',
     variantName: 'zig-windows-x86_64-0.4.0',
     version: '0.4.0'
   })
   assert.deepEqual(await resolveVersion('arm64', 'darwin', '0.11.0'), {
     downloadUrl: 'https://ziglang.org/download/0.11.0/zig-macos-aarch64-0.11.0.tar.xz',
+    fileWithoutFileType: 'zig-macos-aarch64-0.11.0',
     variantName: 'zig-macos-aarch64-0.11.0',
     version: '0.11.0'
   })
   assert.deepEqual(await resolveVersion('arm64', 'darwin', '2024.1.0-mach'), {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-macos-aarch64-0.12.0-dev.2063+804cee3b9.tar.xz',
+    fileWithoutFileType: 'zig-macos-aarch64-0.12.0-dev.2063+804cee3b9',
     variantName: 'zig-macos-aarch64-0.12.0-dev.2063',
     version: '2024.1.0-mach'
   })
   assert.deepEqual(await resolveVersion('x64', 'linux', '2024.3.0-mach'), {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-linux-x86_64-0.12.0-dev.3180+83e578a18.tar.xz',
+    fileWithoutFileType: 'zig-linux-x86_64-0.12.0-dev.3180+83e578a18',
     variantName: 'zig-linux-x86_64-0.12.0-dev.3180',
     version: '2024.3.0-mach'
   })
   assert.deepEqual(await resolveVersion('x64', 'win32', '2024.1.0-mach'), {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-windows-x86_64-0.12.0-dev.2063+804cee3b9.zip',
+    fileWithoutFileType: 'zig-windows-x86_64-0.12.0-dev.2063+804cee3b9',
     variantName: 'zig-windows-x86_64-0.12.0-dev.2063',
     version: '2024.1.0-mach'
   })
   assert.deepEqual(await resolveVersion('arm64', 'darwin', '2024.3.0-mach'), {
     downloadUrl: 'https://pkg.machengine.org/zig/zig-macos-aarch64-0.12.0-dev.3180+83e578a18.tar.xz',
+    fileWithoutFileType: 'zig-macos-aarch64-0.12.0-dev.3180+83e578a18',
     variantName: 'zig-macos-aarch64-0.12.0-dev.3180',
     version: '2024.3.0-mach'
   })

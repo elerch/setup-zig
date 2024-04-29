@@ -28,7 +28,7 @@ async function downloadZig (arch, platform, version, useCache = true) {
 
   const cachedPath = toolCache.find(TOOL_NAME, useVersion)
   if (cachedPath) {
-    actions.info(`using cached zig install: ${cachedPath}`)
+    actions.info(`using cached zig install (version ${useVersion}): ${cachedPath}`)
     return cachedPath
   }
 

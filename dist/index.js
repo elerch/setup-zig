@@ -82210,7 +82210,7 @@ async function downloadZig(arch, platform, version3, useCache = true) {
   } = version3.includes("+") ? resolveCommit(arch, platform, version3) : await resolveVersion(arch, platform, version3);
   const cachedPath = toolCache.find(TOOL_NAME, useVersion);
   if (cachedPath) {
-    actions.info(`using cached zig install: ${cachedPath}`);
+    actions.info(`using cached zig install (version ${useVersion}): ${cachedPath}`);
     return cachedPath;
   }
   const cacheKey = `${TOOL_NAME}-${variantName}`;
